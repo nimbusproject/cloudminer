@@ -99,6 +99,10 @@ class CloudMiner(object):
         _cyv = _CYvent(cyv.source, cyv.name, cyv.key, cyv.timestamp, xtras_list)
         cyvm.add_event(_cyv) 
 
+    def get_iaas_by_runname(self, runname):
+        cyvm_a = self.session.query(_CYVM).filter(_CYVM.runname == runname).all()
+        return cyvm_a
+
     def get_events_by_runname(self, runname):
         cyvm_a = self.session.query(_CYVM).filter(_CYVM.runname == runname).all()
         e_a = []
