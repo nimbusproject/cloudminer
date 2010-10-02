@@ -71,11 +71,12 @@ class CloudMinerTestCase(unittest.TestCase):
         key2 = "key2"
         source2 = "src2"
         name2 = "name2"
+        iaas2 = "iaas2"
         extras['hi'] = 'there'
         cye = CYvent(source, name, key, datetime.datetime.now(), extras)
         self.cdb.add_cloudyvent(self.runname, self.iaasid, cye)
         cye = CYvent(source2, name2, key2, datetime.datetime.now(), extras)
-        self.cdb.add_cloudyvent(run2, self.iaasid, cye)
+        self.cdb.add_cloudyvent(run2, iaas2, cye)
         self.cdb.commit()
 
         rc = self.cdb.get_events_by_runname(self.runname)
