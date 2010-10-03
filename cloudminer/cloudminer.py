@@ -82,10 +82,20 @@ class CloudMiner(object):
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
 
+    def add_cloudyvent_vm(self, runname, iaasid):
+        cyvm = self.get_by_iaasid(iaasid)
+        if cyvm == None:
+            cyvm = _CYVM(runname, iaasid)
+            self.session.add(cyvm)
+            return True
+        return False
+
+
     def add_cloudyvent(self, runname, iaasid, cyv):
 
         # first see if we already have this iaasid.  if not create it
         cyvm = self.get_by_iaasid(iaasid)
+        print iaasid
         if cyvm == None:
             cyvm = _CYVM(runname, iaasid)
             self.session.add(cyvm)
