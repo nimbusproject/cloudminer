@@ -26,7 +26,7 @@ class _CYvent(object):
 
         self.source = source
         self.name = name
-        self.key = key
+        self.unique_event_key = key
         self.timestamp = timestamp
         self.extra = extra
 
@@ -60,7 +60,7 @@ event_table = Table('events', metadata,
     Column('id', Integer, Sequence('event_id_seq'), primary_key=True),
     Column('source', String(50)),
     Column('name', String(50)),
-    Column('key', String(50)),
+    Column('unique_event_key', String(50), unique=True),
     Column('timestamp', sqlalchemy.types.Time),
     Column('vm_id', Integer, ForeignKey('vms.id'))
     )
@@ -96,6 +96,9 @@ class CloudMiner(object):
             cyvm = _CYVM(runname, iaasid, hostname, service_type, runlogdir, vmlogdir)
             self.session.add(cyvm)
             return True
+        else:
+            cyvm.hostname = hostname
+            cyvm.service_type = service_type
         return False
 
 
@@ -120,8 +123,15 @@ class CloudMiner(object):
                     e = _CYventExtra(k, v)
                     xtras_list.append(e)
 
+        c = self.get_event_by_key(cyv.key)
+        if c:
+            return
         _cyv = _CYvent(cyv.source, cyv.name, cyv.key, cyv.timestamp, xtras_list)
         cyvm.add_event(_cyv) 
+
+    def get_event_by_key(self, event_unique_key):
+        cye = self.session.query(_CYvent).filter(_CYvent.unique_event_key == event_unique_key).first()
+        return cye
 
     def get_iaas_by_runname(self, runname):
         cyvm_a = self.session.query(_CYVM).filter(_CYVM.runname == runname).all()
