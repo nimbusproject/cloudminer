@@ -32,10 +32,14 @@ class _CYvent(object):
 
 class _CYVM(object):
 
-    def __init__(self, runname, iaasid, events=[]):
+    def __init__(self, runname, iaasid, hostname, service_type, runlogdir, vmlogdir, events=[]):
         self.runname = runname
         self.iaasid = iaasid
         self.events = events
+        self.hostname = hostname
+        self.service_type = service_type
+        self.vmlogdir = vmlogdir
+        self.runlogdir = runlogdir
 
     def add_event(self, e):
         self.events.append(e)
@@ -45,7 +49,11 @@ metadata = MetaData()
 vm_table = Table('vms', metadata,
     Column('id', Integer, Sequence('event_id_seq'), primary_key=True),
     Column('runname', String(50)),
-    Column('iaasid', String(50), unique=True)
+    Column('iaasid', String(50), unique=True),
+    Column('hostname', String(128)),
+    Column('service_type', String(128)),
+    Column('runlogdir', String(128)),
+    Column('vmlogdir', String(128)),
     )
 
 event_table = Table('events', metadata,
@@ -82,29 +90,35 @@ class CloudMiner(object):
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
 
-    def add_cloudyvent_vm(self, runname, iaasid):
+    def add_cloudyvent_vm(self, runname, iaasid, hostname, service_type, runlogdir, vmlogdir):
         cyvm = self.get_by_iaasid(iaasid)
         if cyvm == None:
-            cyvm = _CYVM(runname, iaasid)
+            cyvm = _CYVM(runname, iaasid, hostname, service_type, runlogdir, vmlogdir)
             self.session.add(cyvm)
             return True
         return False
 
 
-    def add_cloudyvent(self, runname, iaasid, cyv):
+    def add_cloudyvent(self, runname, iaasid, hostname, service_type, runlogdir, vmlogdir, cyv):
 
         # first see if we already have this iaasid.  if not create it
         cyvm = self.get_by_iaasid(iaasid)
-        print iaasid
         if cyvm == None:
-            cyvm = _CYVM(runname, iaasid)
+            cyvm = _CYVM(runname, iaasid, hostname, service_type, runlogdir, vmlogdir)
             self.session.add(cyvm)
+        cyvm.hostname = hostname
+        cyvm.service_type = service_type
 
         xtras_list = []
         if cyv.extra != None:
             for k in cyv.extra.keys():
-                e = _CYventExtra(k, cyv.extra[k])
-                xtras_list.append(e)
+                va = cyv.extra[k]
+                if type(va) != type([]):
+                    va = [va,]
+
+                for v in va:
+                    e = _CYventExtra(k, v)
+                    xtras_list.append(e)
 
         _cyv = _CYvent(cyv.source, cyv.name, cyv.key, cyv.timestamp, xtras_list)
         cyvm.add_event(_cyv) 
