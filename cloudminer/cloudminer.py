@@ -145,6 +145,9 @@ class CloudMiner(object):
 
         return e_a
 
+    def get_events_by_name(self, cyvm, event_name):
+        self.session.query(_CYvent
+
     def get_by_iaasid(self, iaasid):
         cyvm = self.session.query(_CYVM).filter(_CYVM.iaasid == iaasid).first()
         return cyvm
