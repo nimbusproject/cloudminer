@@ -22,6 +22,12 @@ class CloudIaaSTestCase(unittest.TestCase):
     def setUp(self):
         self.cdb = CloudMiner('sqlite:///:memory:')
         self.runname = "run1"
+        self.iaasid = "iceicebaby"
+        self.service_type = "iaasid1"
+        self.hostname = "localhost"
+        self.runlogdir = ""
+        self.vmlogdir = ""
+
 
     def tearDown(self):
         pass
@@ -32,14 +38,13 @@ class CloudIaaSTestCase(unittest.TestCase):
         runname = str(uuid.uuid1())
         iaasid = str(uuid.uuid1())
         source = "src"
-        key = "key"
         event_count = 10
 
         # create and add events
         for i in range(0, event_count):
             name = str(uuid.uuid1())
-            cye = CYvent(source, name, key, datetime.datetime.now(), extras)
-            self.cdb.add_cloudyvent(runname, iaasid, cye)
+            cye = CYvent(source, name, 'key%d' % (i), datetime.datetime.now(), extras)
+            self.cdb.add_cloudyvent(runname, iaasid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
         self.cdb.commit()
 
         # now get an IaaS object
@@ -55,10 +60,10 @@ class CloudIaaSTestCase(unittest.TestCase):
 
         for i in range(0, vm_count):
             iaasid = str(uuid.uuid1())
-            cye = CYvent(source, name, key, datetime.datetime.now(), None)
-            self.cdb.add_cloudyvent(runname, iaasid, cye)
-        self.cdb.commit()
+            cye = CYvent(source, name, 'key%d' % (i), datetime.datetime.now(), None)
+            self.cdb.add_cloudyvent(runname, iaasid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+            self.cdb.commit()
 
         cyvm_a = self.cdb.get_events_by_runname(runname)
-        self.assertEqual(len(cyvm_a), vm_count)
+        self.assertEqual(len(cyvm_a), vm_count, "%d should equal %d" % (len(cyvm_a), vm_count))
 
