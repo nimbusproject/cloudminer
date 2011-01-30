@@ -1,16 +1,12 @@
-import datetime
-import uuid
-import simplejson as json
 import sqlalchemy
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relation, backref
+from sqlalchemy.orm import relation
 from sqlalchemy.orm import mapper
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Table
 from sqlalchemy import Integer
 from sqlalchemy import String, MetaData, Sequence
 from sqlalchemy import Column
-import cloudyvents.cyvents as cyvents
 from sqlalchemy import and_
 
 class _CYventExtra(object):
@@ -32,10 +28,13 @@ class _CYvent(object):
 
 class _CYVM(object):
 
-    def __init__(self, runname, iaasid, hostname, service_type, runlogdir, vmlogdir, events=[]):
+    def __init__(self, runname, iaasid, hostname, service_type, runlogdir, vmlogdir, events=None):
         self.runname = runname
         self.iaasid = iaasid
-        self.events = events
+        if events:
+            self.events = events
+        else:
+            self.events = []
         self.hostname = hostname
         self.service_type = service_type
         self.vmlogdir = vmlogdir
@@ -82,38 +81,41 @@ mapper(_CYVM, vm_table, properties={
 class CloudMiner(object):
 
     def __init__(self, dburl, module=None):
-        if module == None:
-            self.engine = sqlalchemy.create_engine(dburl)
-        else:
+        if module:
             self.engine = sqlalchemy.create_engine(dburl, module=module)
-        metadata.create_all(self.engine) 
+        else:
+            self.engine = sqlalchemy.create_engine(dburl)
+        metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
 
     def add_cloudyvent_vm(self, runname, iaasid, hostname, service_type, runlogdir, vmlogdir):
+        """Add VM to db
+        Return True if this is new.
+        """
         cyvm = self.get_by_iaasid(iaasid)
-        if cyvm == None:
+        if not cyvm:
             cyvm = _CYVM(runname, iaasid, hostname, service_type, runlogdir, vmlogdir)
             self.session.add(cyvm)
             return True
         else:
             cyvm.hostname = hostname
             cyvm.service_type = service_type
-        return False
+            return False
 
 
     def add_cloudyvent(self, runname, iaasid, hostname, service_type, runlogdir, vmlogdir, cyv):
 
         # first see if we already have this iaasid.  if not create it
         cyvm = self.get_by_iaasid(iaasid)
-        if cyvm == None:
+        if not cyvm:
             cyvm = _CYVM(runname, iaasid, hostname, service_type, runlogdir, vmlogdir)
             self.session.add(cyvm)
         cyvm.hostname = hostname
         cyvm.service_type = service_type
 
         xtras_list = []
-        if cyv.extra != None:
+        if cyv.extra is not None:
             for k in cyv.extra.keys():
                 va = cyv.extra[k]
                 if type(va) != type([]):
