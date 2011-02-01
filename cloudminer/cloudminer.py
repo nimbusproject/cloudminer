@@ -60,7 +60,7 @@ event_table = Table('events', metadata,
     Column('source', String(50)),
     Column('name', String(50)),
     Column('unique_event_key', String(50), unique=True),
-    Column('timestamp', sqlalchemy.types.Time),
+    Column('timestamp', sqlalchemy.types.DateTime),
     Column('vm_id', Integer, ForeignKey('vms.id'))
     )
 
