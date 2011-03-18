@@ -23,6 +23,7 @@ class CloudMinerTestCase(unittest.TestCase):
         self.cdb = CloudMiner('sqlite:///:memory:')
         self.runname = "run1"
         self.iaasid = "iaasid1"
+        self.nodeid = "nodeid1"
         self.service_type = "iaasid1"
         self.hostname = "localhost"
         self.runlogdir = ""
@@ -33,20 +34,20 @@ class CloudMinerTestCase(unittest.TestCase):
     
     def test_simple_insert_with_extra_none(self):
         cye = CYvent('src1', 'name1', 'key', datetime.datetime.now(), None)
-        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
         self.cdb.commit()
 
     def test_simple_insert_with_extra(self):
         extras = {}
         extras['hi'] = 'there'
         cye = CYvent('src1', 'name1', 'key', datetime.datetime.now(), extras)
-        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
         self.cdb.commit()
 
     def test_simple_insert_with_extra_empty(self):
         extras = {}
         cye = CYvent('src1', 'name1', 'key', datetime.datetime.now(), extras)
-        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
         self.cdb.commit()
 
     def test_simple_query(self):
@@ -56,7 +57,7 @@ class CloudMinerTestCase(unittest.TestCase):
         name = "name1"
         extras['hi'] = 'there'
         cye = CYvent(source, name, key, datetime.datetime.now(), extras)
-        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
         self.cdb.commit()
 
         rc = self.cdb.get_events_by_runname(self.runname)
@@ -76,11 +77,12 @@ class CloudMinerTestCase(unittest.TestCase):
         source2 = "src2"
         name2 = "name2"
         iaas2 = "iaas2"
+        nodeid2 = "nodeid2"
         extras['hi'] = 'there'
         cye = CYvent(source, name, key, datetime.datetime.now(), extras)
-        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
         cye = CYvent(source2, name2, key2, datetime.datetime.now(), extras)
-        self.cdb.add_cloudyvent(run2, iaas2, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+        self.cdb.add_cloudyvent(run2, iaas2, nodeid2, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
         self.cdb.commit()
 
         rc = self.cdb.get_events_by_runname(self.runname)
@@ -99,22 +101,22 @@ class CloudMinerTestCase(unittest.TestCase):
         extras = {}
         extras['hi'] = 'there'
         cye = CYvent('src1', 'name1', 'key', datetime.datetime.now(), extras)
-        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
         self.cdb.commit()
 
         cdb2 = CloudMiner('sqlite:///:memory:')
-        cdb2.add_cloudyvent(self.runname, self.iaasid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+        cdb2.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
         cdb2.commit()
 
     def test_multiply_cms_simple(self):
         extras = {}
         extras['hi'] = 'there'
         cye = CYvent('src1', 'name1', 'key', datetime.datetime.now(), extras)
-        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
         self.cdb.commit()
 
         cdb2 = CloudMiner('sqlite:///:memory:')
-        cdb2.add_cloudyvent(self.runname, self.iaasid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+        cdb2.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
         cdb2.commit()
 
         rc = self.cdb.get_events_by_runname(self.runname)
@@ -129,7 +131,7 @@ class CloudMinerTestCase(unittest.TestCase):
         e_count = 10
         for i in range(0, e_count):
             cye = CYvent('src1', 'name%d' % (i), 'key%d' % (i), datetime.datetime.now(), extras)
-            self.cdb.add_cloudyvent(self.runname, self.iaasid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+            self.cdb.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
 
         self.cdb.commit()
 

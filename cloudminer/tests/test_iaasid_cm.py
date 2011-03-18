@@ -23,6 +23,7 @@ class CloudIaaSTestCase(unittest.TestCase):
         self.cdb = CloudMiner('sqlite:///:memory:')
         self.runname = "run1"
         self.iaasid = "iceicebaby"
+        self.nodeid = "toocold"
         self.service_type = "iaasid1"
         self.hostname = "localhost"
         self.runlogdir = ""
@@ -37,6 +38,7 @@ class CloudIaaSTestCase(unittest.TestCase):
         extras['hi'] = 'there'
         runname = str(uuid.uuid1())
         iaasid = str(uuid.uuid1())
+        nodeid = str(uuid.uuid1())
         source = "src"
         event_count = 10
 
@@ -44,7 +46,7 @@ class CloudIaaSTestCase(unittest.TestCase):
         for i in range(0, event_count):
             name = str(uuid.uuid1())
             cye = CYvent(source, name, 'key%d' % (i), datetime.datetime.now(), extras)
-            self.cdb.add_cloudyvent(runname, iaasid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+            self.cdb.add_cloudyvent(runname, iaasid, nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
         self.cdb.commit()
 
         # now get an IaaS object
@@ -60,8 +62,9 @@ class CloudIaaSTestCase(unittest.TestCase):
 
         for i in range(0, vm_count):
             iaasid = str(uuid.uuid1())
+            nodeid = str(uuid.uuid1())
             cye = CYvent(source, name, 'key%d' % (i), datetime.datetime.now(), None)
-            self.cdb.add_cloudyvent(runname, iaasid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+            self.cdb.add_cloudyvent(runname, iaasid, nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
             self.cdb.commit()
 
         cyvm_a = self.cdb.get_events_by_runname(runname)

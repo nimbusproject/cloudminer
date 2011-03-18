@@ -28,9 +28,10 @@ class _CYvent(object):
 
 class _CYVM(object):
 
-    def __init__(self, runname, iaasid, hostname, service_type, runlogdir, vmlogdir, events=None):
+    def __init__(self, runname, iaasid, nodeid, hostname, service_type, runlogdir, vmlogdir, events=None):
         self.runname = runname
         self.iaasid = iaasid
+        self.nodeid = nodeid
         if events:
             self.events = events
         else:
@@ -49,6 +50,7 @@ vm_table = Table('vms', metadata,
     Column('id', Integer, Sequence('event_id_seq'), primary_key=True),
     Column('runname', String(50)),
     Column('iaasid', String(50), unique=True),
+    Column('nodeid', String(128), unique=True),
     Column('hostname', String(128)),
     Column('service_type', String(128)),
     Column('runlogdir', String(128)),
@@ -89,13 +91,13 @@ class CloudMiner(object):
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
 
-    def add_cloudyvent_vm(self, runname, iaasid, hostname, service_type, runlogdir, vmlogdir):
+    def add_cloudyvent_vm(self, runname, iaasid, nodeid, hostname, service_type, runlogdir, vmlogdir):
         """Add VM to db
         Return True if this is new.
         """
         cyvm = self.get_by_iaasid(iaasid)
         if not cyvm:
-            cyvm = _CYVM(runname, iaasid, hostname, service_type, runlogdir, vmlogdir)
+            cyvm = _CYVM(runname, iaasid, nodeid, hostname, service_type, runlogdir, vmlogdir)
             self.session.add(cyvm)
             return True
         else:
@@ -104,12 +106,12 @@ class CloudMiner(object):
             return False
 
 
-    def add_cloudyvent(self, runname, iaasid, hostname, service_type, runlogdir, vmlogdir, cyv):
+    def add_cloudyvent(self, runname, iaasid, nodeid, hostname, service_type, runlogdir, vmlogdir, cyv):
 
         # first see if we already have this iaasid.  if not create it
         cyvm = self.get_by_iaasid(iaasid)
         if not cyvm:
-            cyvm = _CYVM(runname, iaasid, hostname, service_type, runlogdir, vmlogdir)
+            cyvm = _CYVM(runname, iaasid, nodeid, hostname, service_type, runlogdir, vmlogdir)
             self.session.add(cyvm)
         cyvm.hostname = hostname
         cyvm.service_type = service_type
