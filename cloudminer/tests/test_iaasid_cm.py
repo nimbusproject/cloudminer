@@ -25,6 +25,7 @@ class CloudIaaSTestCase(unittest.TestCase):
         self.iaasid = "iceicebaby"
         self.nodeid = "toocold"
         self.service_type = "iaasid1"
+        self.parent = None
         self.hostname = "localhost"
         self.runlogdir = ""
         self.vmlogdir = ""
@@ -46,7 +47,7 @@ class CloudIaaSTestCase(unittest.TestCase):
         for i in range(0, event_count):
             name = str(uuid.uuid1())
             cye = CYvent(source, name, 'key%d' % (i), datetime.datetime.now(), extras)
-            self.cdb.add_cloudyvent(runname, iaasid, nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+            self.cdb.add_cloudyvent(runname, iaasid, nodeid, self.hostname, self.service_type, self.parent, self.runlogdir, self.vmlogdir, cye)
         self.cdb.commit()
 
         # now get an IaaS object
@@ -64,7 +65,7 @@ class CloudIaaSTestCase(unittest.TestCase):
             iaasid = str(uuid.uuid1())
             nodeid = str(uuid.uuid1())
             cye = CYvent(source, name, 'key%d' % (i), datetime.datetime.now(), None)
-            self.cdb.add_cloudyvent(runname, iaasid, nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+            self.cdb.add_cloudyvent(runname, iaasid, nodeid, self.hostname, self.service_type, self.parent, self.runlogdir, self.vmlogdir, cye)
             self.cdb.commit()
 
         cyvm_a = self.cdb.get_events_by_runname(runname)

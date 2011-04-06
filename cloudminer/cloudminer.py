@@ -28,7 +28,7 @@ class _CYvent(object):
 
 class _CYVM(object):
 
-    def __init__(self, runname, iaasid, nodeid, hostname, service_type, runlogdir, vmlogdir, events=None):
+    def __init__(self, runname, iaasid, nodeid, hostname, service_type, parent, runlogdir, vmlogdir, events=None):
         self.runname = runname
         self.iaasid = iaasid
         self.nodeid = nodeid
@@ -38,6 +38,7 @@ class _CYVM(object):
             self.events = []
         self.hostname = hostname
         self.service_type = service_type
+        self.parent = parent
         self.vmlogdir = vmlogdir
         self.runlogdir = runlogdir
 
@@ -53,6 +54,7 @@ vm_table = Table('vms', metadata,
     Column('nodeid', String(128), unique=True),
     Column('hostname', String(128)),
     Column('service_type', String(128)),
+    Column('parent', String(128)),
     Column('runlogdir', String(128)),
     Column('vmlogdir', String(128)),
     )
@@ -91,27 +93,29 @@ class CloudMiner(object):
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
 
-    def add_cloudyvent_vm(self, runname, iaasid, nodeid, hostname, service_type, runlogdir, vmlogdir):
+    def add_cloudyvent_vm(self, runname, iaasid, nodeid, hostname, service_type, parent, runlogdir, vmlogdir):
         """Add VM to db
         Return True if this is new.
         """
         cyvm = self.get_by_iaasid(iaasid)
         if not cyvm:
-            cyvm = _CYVM(runname, iaasid, nodeid, hostname, service_type, runlogdir, vmlogdir)
+            cyvm = _CYVM(runname, iaasid, nodeid, hostname, service_type, parent, runlogdir, vmlogdir)
             self.session.add(cyvm)
             return True
         else:
             cyvm.hostname = hostname
             cyvm.service_type = service_type
+            cyvm.nodeid = nodeid
+            cyvm.parent = parent
             return False
 
 
-    def add_cloudyvent(self, runname, iaasid, nodeid, hostname, service_type, runlogdir, vmlogdir, cyv):
+    def add_cloudyvent(self, runname, iaasid, nodeid, hostname, service_type, parent, runlogdir, vmlogdir, cyv):
 
         # first see if we already have this iaasid.  if not create it
         cyvm = self.get_by_iaasid(iaasid)
         if not cyvm:
-            cyvm = _CYVM(runname, iaasid, nodeid, hostname, service_type, runlogdir, vmlogdir)
+            cyvm = _CYVM(runname, iaasid, nodeid, hostname, service_type, parent, runlogdir, vmlogdir)
             self.session.add(cyvm)
         cyvm.hostname = hostname
         cyvm.service_type = service_type
@@ -157,6 +161,12 @@ class CloudMiner(object):
         cyvm_a = self.session.query(_CYVM).filter(and_(
           _CYVM.runname == runname,
           _CYVM.service_type == service_type)).all()
+        return cyvm_a
+
+    def get_vms_by_parent(self, runname, parent):
+        cyvm_a = self.session.query(_CYVM).filter(and_(
+          _CYVM.runname == runname,
+          _CYVM.parent == parent)).all()
         return cyvm_a
 
     def commit(self):

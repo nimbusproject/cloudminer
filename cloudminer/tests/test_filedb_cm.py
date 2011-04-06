@@ -27,6 +27,7 @@ class CloudMinerRealFileTestCase(unittest.TestCase):
         self.runname = "runitk"
         self.iaasid = "iceicebaby"
         self.nodeid = "toocold"
+        self.parent = None
         self.service_type = "iaasid1"
         self.hostname = "localhost"
         self.runlogdir = ""
@@ -44,19 +45,19 @@ class CloudMinerRealFileTestCase(unittest.TestCase):
         name = "name1"
         extras['hi'] = 'there'
         cye = CYvent(source, name, key, datetime.datetime.now(), extras)
-        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.parent, self.runlogdir, self.vmlogdir, cye)
         self.cdb.commit()
 
     def test_multiply_cms_simple(self):
         extras = {}
         extras['hi'] = 'there'
         cye = CYvent('src1', 'name1', 'key', datetime.datetime.now(), extras)
-        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.parent, self.runlogdir, self.vmlogdir, cye)
         self.cdb.commit()
 
         cye = CYvent('src1', 'name1', 'key2', datetime.datetime.now(), extras)
         cdb2 = CloudMiner('sqlite:///' + self.filename)
-        cdb2.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+        cdb2.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.parent, self.runlogdir, self.vmlogdir, cye)
         cdb2.commit()
 
         rc = self.cdb.get_events_by_runname(self.runname)
@@ -69,7 +70,7 @@ class CloudMinerRealFileTestCase(unittest.TestCase):
         extras = {}
         extras['hi'] = 'there'
         cye = CYvent('src1', 'name1', 'key', datetime.datetime.now(), extras)
-        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.runlogdir, self.vmlogdir, cye)
+        self.cdb.add_cloudyvent(self.runname, self.iaasid, self.nodeid, self.hostname, self.service_type, self.parent, self.runlogdir, self.vmlogdir, cye)
 
         cdb2 = CloudMiner('sqlite:///' + self.filename)
 
